@@ -12,7 +12,7 @@ const LoginForm: React.FC = () => {
     const navigate = useNavigate();
 
     // handle login form submission
-    const handleSubmit = (e: any) => {
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
         if (!email || !password) {
             setError("Please fill in all fields");
@@ -40,8 +40,10 @@ const LoginForm: React.FC = () => {
         }
         setError("");
 
+        // API call for login
         try {
 
+            navigate('/dashboard');
         } catch (error: any) {
             setError(error.message);
         }
