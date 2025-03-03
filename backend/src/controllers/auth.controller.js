@@ -14,7 +14,14 @@ export const register = async (req, res) => {
     const { fullName, email, password, profileImageUrl, username } = req.body;
 
     if (!fullName || !email || !password || !profileImageUrl || !username) {
-        return res.status(400).json(new ApiResponse(400, "", 'All fields are required'));
+        return res.status(400).json(new ApiResponse(400,
+            {
+                fullName,
+                email,
+                password,
+                profileImageUrl,
+                username
+            }, 'All fields are required'));
     }
 
     // validation: check for username format
@@ -70,10 +77,12 @@ export const login = async (req, res) => {
         }
 
         const response = new Object({
-            ...user.toObject(),
-            totalPollsVotes: 0,
-            totalPollsCreated: 0,
-            totalPollsBookmarked: 0,
+            user: {
+                ...user.toObject(),
+                totalPollsVotes: 0,
+                totalPollsCreated: 0,
+                totalPollsBookmarked: 0,
+            },
             token: generateToken(user._id)
         })
         return res.status(200).json(new ApiResponse(200, response, "login successfull"))

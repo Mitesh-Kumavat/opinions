@@ -1,9 +1,14 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import AuthLayout from '../../components/layout/AuthLayout'
 import AuthInput from '../../components/input/AuthInput'
 import { Link, useNavigate } from 'react-router-dom';
 import ProfilePhotoSelector from '../../components/input/ProfilePhotoSelector';
 import { validateEmail, validatePassword } from '../../utils/helper';
+import { Usercontext } from '../../context/UserContext';
+import { axiosInstance } from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/apiPaths';
+import { uploadImage } from '../../utils/uploadImage';
+import Spinner from '../../components/loaders/Spinner';
 
 const SignUpForm: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -12,8 +17,9 @@ const SignUpForm: React.FC = () => {
     const [fullName, setFullName] = useState('');
     const [userName, setUserName] = useState('');
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const navigate = useNavigate();
-
+    const { updateUser } = useContext(Usercontext);
     // handle sign up form submission
     const handleSignUp = async (e: any) => {
         e.preventDefault();
@@ -43,13 +49,31 @@ const SignUpForm: React.FC = () => {
         }
         setError("");
 
+        setIsLoading(true)
+        let profileImageUrl;
+        if (profilePic) {
+            const imageUrl = await uploadImage(profilePic)
+            console.log(imageUrl);
+            profileImageUrl = imageUrl;
+        }
+
         // API call for sign up
         try {
+            const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER,
+                { fullName, email, password, profileImageUrl, username: userName });
+            console.log(response.data);
+            const token = response.data;
+            const user = response.data.user;
 
+            if (token) localStorage.setItem("token", token);
+            if (user) updateUser(user);
             navigate('/dashboard');
         } catch (error: any) {
-            setError(error.message);
+            setError(error?.response?.data.message || error?.message || "Something went wrong");
+        } finally {
+            setIsLoading(false)
         }
+        setIsLoading(false)
     }
 
     return (
@@ -92,7 +116,7 @@ const SignUpForm: React.FC = () => {
                     </div>
                     {error && <p className='text-red-500 text-xs pb-2.5'>{error}</p>}
 
-                    <button type='submit' className='btn-primary'>Sign Up</button>
+                    <button type='submit' className={`flex justify-center ${isLoading ? 'btn-disabled' : 'btn-primary'}`} disabled={isLoading}>{isLoading ? <Spinner size="md" color="border-primary" speed="fast" ></Spinner> : "Sign Up"}</button>
 
                     <p className='text-[13px] text-slate-800 mt-3'>Already have an account? <Link className='font-medium text-primary underline ' to={"/login"}> Login</Link></p>
                 </form>

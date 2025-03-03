@@ -1,8 +1,12 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import AuthLayout from '../../components/layout/AuthLayout'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthInput from '../../components/input/AuthInput'
 import { validateEmail, validatePassword } from '../../utils/helper'
+import { axiosInstance } from '../../utils/axiosInstance'
+import { API_PATHS } from '../../utils/apiPaths'
+import { Usercontext } from '../../context/UserContext'
+import Spinner from '../../components/loaders/Spinner'
 
 const LoginForm: React.FC = () => {
 
@@ -10,6 +14,8 @@ const LoginForm: React.FC = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const { updateUser } = useContext(Usercontext);
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
     // handle login form submission
     const handleSubmit = async (e: any) => {
@@ -39,14 +45,21 @@ const LoginForm: React.FC = () => {
             return
         }
         setError("");
-
+        setIsLoading(true)
         // API call for login
         try {
+            const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, { email, password });
+            const { token, user } = response.data.data;
 
+            if (token) localStorage.setItem("token", token);
+            if (user) updateUser(user);
             navigate('/dashboard');
         } catch (error: any) {
-            setError(error.message);
+            setError(error?.response?.data.message || error?.message || "Something went wrong");
+        } finally {
+            setIsLoading(false);
         }
+        setIsLoading(false);
     };
 
     return (
@@ -72,7 +85,7 @@ const LoginForm: React.FC = () => {
 
                     {error && <p className='text-red-500 text-xs pb-2.5'>{error}</p>}
 
-                    <button type='submit' className='btn-primary'> Login</button>
+                    <button type='submit' className={`flex justify-center ${isLoading ? 'btn-disabled' : 'btn-primary'}`} disabled={isLoading}>{isLoading ? <Spinner size="md" color="border-primary" speed="fast" ></Spinner> : "Login"}</button>
 
                     <p className='text-[13px] text-slate-800 mt-3'>Don't have an account? <Link className='font-medium text-primary underline ' to={"/signup"}> SignUp</Link></p>
                 </form>

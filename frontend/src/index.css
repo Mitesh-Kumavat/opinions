@@ -22,4 +22,8 @@
     .btn-primary {
         @apply w-full text-sm font-medium text-white bg-primary shadow-lg shadow-primary/5 p-[10px] rounded-md my-1 hover:bg-primary/25 transition-all duration-300 hover:text-primary;
     }
+
+    .btn-disabled {
+        @apply cursor-not-allowed w-full text-sm font-medium text-white bg-primary/45 shadow-lg shadow-primary/5 p-[10px] rounded-md my-1
+    }
 }
