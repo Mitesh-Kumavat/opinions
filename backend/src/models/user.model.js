@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema({
     username: {
@@ -42,17 +41,15 @@ const userSchema = new mongoose.Schema({
 // run this before saving the user...
 userSchema.pre('save', async function (next) {
     if (this.isModified("password")) {
-        this.password = bcrypt.hash(this.password, 10)
+        this.password = await bcrypt.hash(this.password, 10)
     }
     next();
 })
 
 
 // We have added this methods for User schmea so now when we create any user so we can access this methods from User.method() 
-userSchema.methods.isPasswordCorrect = async function (password) {
+userSchema.methods.comparePassword = async function (password) {
     return await bcrypt.compare(password, this.password)
 }
-
-
 
 export const User = mongoose.model("User", userSchema);
