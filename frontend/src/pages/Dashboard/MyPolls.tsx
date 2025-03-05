@@ -1,8 +1,11 @@
 import React from 'react'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 
 const MyPolls: React.FC = () => {
     return (
-        <div>MyPolls</div>
+        <DashboardLayout activeMenu='My Polls'>
+            <div>My Polls</div>
+        </DashboardLayout>
     )
 }
 
