@@ -6,7 +6,7 @@ import { uploadOnCloudinary } from '../utils/cloudinary.js';
 
 // Generate JWT Token
 export const generateToken = (userId) => {
-    return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "1h" })
+    return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "30d" })
 };
 
 // Register User
@@ -56,7 +56,7 @@ export const register = async (req, res) => {
 
 
     } catch (error) {
-        return res.status(error.statusCode).json(new ApiResponse(error.statusCode, error, error.message || 'Internal Server Error'));
+        return res.status(error?.statusCode || 500).json(new ApiResponse(error?.statusCode || 500, error, error.message || 'Internal Server Error'));
     }
 }
 
@@ -88,9 +88,7 @@ export const login = async (req, res) => {
         return res.status(200).json(new ApiResponse(200, response, "login successfull"))
 
     } catch (error) {
-        console.log(error);
-
-        return res.status(500).json(new ApiResponse(500, error, error.message || 'Internal Server Error'));
+        return res.status(error?.statusCode || 500).json(new ApiResponse(error?.statusCode || 500, error, error.message || 'Internal Server Error'));
     }
 }
 

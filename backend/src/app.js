@@ -15,9 +15,11 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
-
+//Route Setup.
 import authRouter from "./routes/auth.route.js";
+import pollRouter from "./routes/poll.route.js"
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/poll", pollRouter);
 
 export { app }
