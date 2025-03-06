@@ -4,7 +4,7 @@ import {
     createPoll,
     getAllPolls,
     voteOnPoll,
-    votedPolls,
+    getvotedPolls,
     closePoll,
     bookmarkPoll,
     getPollById,
@@ -16,12 +16,12 @@ const router = Router();
 
 router.post("/create", protect, createPoll);
 router.get("/getAllPolls", protect, getAllPolls);
-router.get("/votedPolls", protect, votedPolls);
+router.get("/votedPolls", protect, getvotedPolls);
 router.get("/:id", protect, getPollById);
 router.post("/:id/vote", protect, voteOnPoll);
 router.post("/:id/close", protect, closePoll);
 router.post("/:id/bookmark", protect, bookmarkPoll);
-router.get("/:id/bookmarked", protect, getBookmarkedPolls);
+router.get("/user/bookmarked", protect, getBookmarkedPolls);
 router.delete("/:id/delete", protect, deletePoll);
 
 

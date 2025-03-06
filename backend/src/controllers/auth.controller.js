@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user.model.js';
+import { Poll } from '../models/poll.model.js';
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { uploadOnCloudinary } from '../utils/cloudinary.js';
@@ -76,12 +77,16 @@ export const login = async (req, res) => {
             throw new ApiError(401, "Invalid email or password.")
         }
 
+        const totalPollsCreated = await Poll.countDocuments({ creator: user._id });
+        const totalPollsVotes = await Poll.countDocuments({ voters: user._id });
+        const totalPollsBookmarked = user.bookmarkedPolls.length;
+
         const response = new Object({
             user: {
                 ...user.toObject(),
-                totalPollsVotes: 0,
-                totalPollsCreated: 0,
-                totalPollsBookmarked: 0,
+                totalPollsVotes: totalPollsVotes || 0,
+                totalPollsCreated: totalPollsCreated || 0,
+                totalPollsBookmarked: totalPollsBookmarked || 0,
             },
             token: generateToken(user._id)
         })
@@ -96,11 +101,16 @@ export const login = async (req, res) => {
 export const getUserInfo = async (req, res) => {
     const user = await User.findById(req.user._id).select("-password");
     if (user) {
+
+        const totalPollsCreated = await Poll.countDocuments({ creator: user._id });
+        const totalPollsVotes = await Poll.countDocuments({ voters: user._id });
+        const totalPollsBookmarked = user.bookmarkedPolls.length;
+
         const response = new Object({
             ...user.toObject(),
-            totalPollsVotes: 0,
-            totalPollsCreated: 0,
-            totalPollsBookmarked: 0,
+            totalPollsVotes: totalPollsVotes || 0,
+            totalPollsCreated: totalPollsCreated || 0,
+            totalPollsBookmarked: totalPollsBookmarked || 0,
         })
         return res.json(new ApiResponse(200, response, 'User found'));
     } else {

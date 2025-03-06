@@ -142,8 +142,16 @@ export const getAllPolls = async (req, res) => {
 };
 
 export const getPollById = async (req, res) => {
-    try {
+    const { id } = req.params;
 
+    try {
+        const poll = await Poll.findById(id).populate("creator", "username email");
+
+        if (!poll) {
+            throw new ApiError(400, "Poll not found")
+        }
+
+        return res.status(200).json(new ApiResponse(200, poll))
     } catch (error) {
         console.log(error);
         return res.status(error?.statusCode || 500).json(new ApiResponse(error?.statusCode || 500, error, error.message || 'Internal Server Error'));
@@ -151,7 +159,45 @@ export const getPollById = async (req, res) => {
 };
 
 export const voteOnPoll = async (req, res) => {
+    const { id } = req.params;
+    const { optionIndex, voterId, responseText } = req.body;
+
     try {
+        const poll = await Poll.findById(id);
+
+        if (!poll) {
+            throw new ApiError(400, "Poll not found");
+        }
+
+        if (poll.closed) {
+            throw new ApiError(400, "Poll is closed");
+        }
+
+        if (poll.voters.includes(voterId)) {
+            throw new ApiError(400, "User has already voted on this poll");
+        }
+
+        if (poll.type === "open-ended") {
+            if (!responseText) {
+                throw new ApiError(400, "Response Text is required for open ended polls.");
+            }
+
+            poll.responses.push({
+                voterId,
+                responseText
+            });
+        } else {
+            if (optionIndex === undefined || optionIndex < 0 || optionIndex >= poll.options.length) {
+                throw new ApiError(400, "Invalid option index.");
+            }
+
+            poll.options[optionIndex].votes += 1;
+        }
+
+        poll.voters.push(voterId);
+        await poll.save();
+
+        return res.status(200).json(new ApiResponse(200, poll));
 
     } catch (error) {
         console.log(error);
@@ -159,8 +205,42 @@ export const voteOnPoll = async (req, res) => {
     }
 };
 
-export const votedPolls = async (req, res) => {
+export const getvotedPolls = async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+    const userId = req.user._id;
+
     try {
+        const pageNumber = parseInt(page, 10);
+        const pageSize = parseInt(limit, 10);
+        const skip = (pageNumber - 1) * pageSize;
+
+        const polls = await Poll.find({ voters: userId })
+            .populate("creator", "fullName profileImageUrl username email")
+            .populate({
+                path: "responses.voterId",
+                select: "username fullName profileImageUrl"
+            })
+            .skip(skip)
+            .limit(pageSize);
+
+        const updatedPolls = polls.map((poll) => {
+            const userHasVoted = poll.voters.some((voterId) => voterId.equals(userId));
+            return {
+                ...poll.toObject(),
+                userHasVoted,
+            };
+        });
+
+        const totalVotedPolls = await Poll.countDocuments({ voters: userId });
+
+        const response = new ApiResponse(200, {
+            polls: updatedPolls,
+            currentPage: pageNumber,
+            totalPages: Math.ceil(totalVotedPolls / pageSize),
+            totalVotedPolls,
+        })
+
+        return res.status(200).json(response);
 
     } catch (error) {
         console.log(error);
@@ -169,8 +249,24 @@ export const votedPolls = async (req, res) => {
 };
 
 export const closePoll = async (req, res) => {
-    try {
+    const { id } = req.params;
+    const userId = req.user._id;
 
+    try {
+        const poll = await Poll.findById(id);
+
+        if (!poll) {
+            throw new ApiError(400, "Poll not found.")
+        }
+
+        if (poll.creator.toString() !== (userId).toString()) {
+            throw new ApiError(403, "You are not authorized to close this poll.")
+        }
+
+        poll.closed = true;
+        await poll.save();
+
+        return res.status(200).json(new ApiResponse(200, poll, "Poll closed Successfully"))
     } catch (error) {
         console.log(error);
         return res.status(error?.statusCode || 500).json(new ApiResponse(error?.statusCode || 500, error, error.message || 'Internal Server Error'));
@@ -178,7 +274,33 @@ export const closePoll = async (req, res) => {
 };
 
 export const bookmarkPoll = async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user._id;
+
     try {
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new ApiError(404, "User not found");
+        }
+
+        const isBookmarked = user.bookmarkedPolls.includes(id);
+
+        if (isBookmarked) {
+            user.bookmarkedPolls = user.bookmarkedPolls.filter((pollId) => pollId.toString() !== id)
+            await user.save();
+
+            return res.status(200).json(new ApiResponse(200, {
+                bookmarkedPolls: user.bookmarkedPolls,
+                message: "Poll removed from bookmarks"
+            }, "poll removed from bookmarks"))
+        }
+
+        user.bookmarkedPolls.push(id);
+        await user.save();
+        return res.status(200).json(new ApiResponse(200, {
+            bookmarkedPolls: user.bookmarkedPolls,
+            message: "Poll added to bookmarks"
+        }, "poll added to bookmarks"))
 
     } catch (error) {
         console.log(error);
@@ -187,7 +309,24 @@ export const bookmarkPoll = async (req, res) => {
 };
 
 export const deletePoll = async (req, res) => {
+
+    const { id } = req.params;
+    const userId = req.user._id;
+
     try {
+        const poll = await Poll.findById(id);
+
+        if (!poll) {
+            throw new ApiResponse(404, "Poll not found");
+        }
+
+        if (poll.creator.toString() !== (userId).toString()) {
+            throw new ApiResponse(403, {}, "You are not authorized to delete this post.")
+        }
+
+        await Poll.findByIdAndDelete(id);
+
+        return res.status(200).json(new ApiResponse(200, poll, "Poll deleted successfully"));
 
     } catch (error) {
         console.log(error);
@@ -196,8 +335,35 @@ export const deletePoll = async (req, res) => {
 };
 
 export const getBookmarkedPolls = async (req, res) => {
-    try {
+    const userId = req.user._id;
 
+    try {
+        const user = await User.findById(userId).populate({
+            path: "bookmarkedPolls",
+            populate: {
+                path: "creator",
+                select: "fullName username profileImageUrl"
+            }
+        })
+
+        if (!user) throw new ApiError(404, "User not found")
+
+        const bookmarkedPolls = user.bookmarkedPolls;
+
+        const updatedPolls = bookmarkedPolls.map((poll) => {
+            const userHasVoted = poll.voters.some((voterId) => voterId.equals(userId));
+
+            return {
+                ...poll.toObject(),
+                userHasVoted
+            };
+        })
+
+        const response = new ApiResponse(200, {
+            bookmarkedPolls: updatedPolls,
+        })
+
+        return res.status(200).json(response);
     } catch (error) {
         console.log(error);
         return res.status(error?.statusCode || 500).json(new ApiResponse(error?.statusCode || 500, error, error.message || 'Internal Server Error'));
