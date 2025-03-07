@@ -4,7 +4,7 @@ import { HiMiniPlus } from "react-icons/hi2";
 
 const OptionInput = ({ optionList, setOptionList }: any) => {
 
-    const [option, setOption] = useState<string | number | any>();
+    const [option, setOption] = useState<any>();
 
     const handleAddOption = () => {
         if (option.trim() && optionList.length < 4) {
@@ -21,7 +21,7 @@ const OptionInput = ({ optionList, setOptionList }: any) => {
     return (
         <div>
             {optionList.map((item: any, index: number) => (
-                <div className="flex justify-between bg-gray-200/80 px-4 py-2 mb-3 rounded-md">
+                <div key={index} className="flex justify-between bg-gray-200/80 px-4 py-2 mb-3 rounded-md">
                     <p className="text-xs font-medium text-black">{item}</p>
                     <button
                         onClick={() => handleDeleteOption(index)}

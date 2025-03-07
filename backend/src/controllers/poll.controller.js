@@ -35,8 +35,8 @@ export const createPoll = async (req, res) => {
                 if (!options || options.length < 2) {
                     return res.status(400).json(new ApiResponse(400, "Image based poll must have at least 2 images", "Insufficient Images."));
                 }
-
                 proccessedOptions = options.map((url) => ({ optionText: url }))
+                break;
             default:
                 return res.status(400).json(new ApiResponse(400, "Select the valid poll type.", "Invalid poll type."));
                 break;

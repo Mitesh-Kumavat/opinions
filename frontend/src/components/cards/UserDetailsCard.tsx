@@ -1,3 +1,5 @@
+import { RxAvatar } from "react-icons/rx";
+import CharAvatar from "./CharAvatar";
 
 const StatsInfo = ({ label, value }: any) => {
     return (
@@ -20,11 +22,20 @@ const UserDetailsCard = ({
         <div className="bg-slate-100/50 rounded-lg mt-16 overflow-hidden">
             <div className="w-full h-32 bg-primary/50 flex justify-center relative ">
                 <div className="absolute -bottom-10 rounded-full overflow-hidden border-2 border-primary">
-                    <img
-                        src={profileImageUrl || ""}
-                        alt={username}
-                        className="w-20 h-20 bg-slate-400 rounded-full"
-                    />
+                    {profileImageUrl ? (
+                        <img
+                            src={profileImageUrl || ""}
+                            alt={username}
+                            className="w-20 h-20 bg-slate-400 rounded-full"
+                        />
+                    ) : (
+                        <CharAvatar
+                            fullname={fullname}
+                            width="w-20"
+                            height="h-20"
+                            style="text-xl"
+                        />
+                    )}
                 </div>
             </div>
 

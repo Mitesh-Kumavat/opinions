@@ -7,21 +7,32 @@ import CreatePoll from './pages/Dashboard/CreatePoll'
 import MyPolls from './pages/Dashboard/MyPolls'
 import Bookmarks from './pages/Dashboard/Bookmarks'
 import VotedPoll from './pages/Dashboard/VotedPoll'
+import { Toaster } from 'react-hot-toast'
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Root />} />
-        <Route path="/login" element={<LoginForm />} />
-        <Route path="/signup" element={<SignUpForm />} />
-        <Route path="/dashboard" element={<Home />} />
-        <Route path="/create-poll" element={<CreatePoll />} />
-        <Route path="/my-polls" element={<MyPolls />} />
-        <Route path="/voted-polls" element={<VotedPoll />} />
-        <Route path="/bookmarked-polls" element={<Bookmarks />} />
-      </Routes>
-    </Router>
+    <>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Root />} />
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/signup" element={<SignUpForm />} />
+          <Route path="/dashboard" element={<Home />} />
+          <Route path="/create-poll" element={<CreatePoll />} />
+          <Route path="/my-polls" element={<MyPolls />} />
+          <Route path="/voted-polls" element={<VotedPoll />} />
+          <Route path="/bookmarked-polls" element={<Bookmarks />} />
+        </Routes>
+      </Router>
+
+      <Toaster
+        toastOptions={{
+          style: {
+            fontSize: '13px'
+          }
+        }}
+      />
+    </>
   )
 }
 
