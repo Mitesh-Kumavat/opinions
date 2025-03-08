@@ -5,7 +5,6 @@ import { POLL_TYPE } from '../../utils/data';
 const HeaderWithFilter = ({ title, filterType, setFilterType }: any) => {
 
     const [open, setOpen] = useState<Boolean>(false);
-
     return (
         <div>
             <div className='flex items-center justify-between'>

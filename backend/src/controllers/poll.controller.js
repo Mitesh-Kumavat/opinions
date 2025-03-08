@@ -145,7 +145,12 @@ export const getPollById = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const poll = await Poll.findById(id).populate("creator", "username email");
+        const poll = await Poll.findById(id)
+            .populate("creator", "username email")
+            .populate({
+                path: "responses.voterId",
+                select: "username profileImageUrl fullName",
+            });
 
         if (!poll) {
             throw new ApiError(400, "Poll not found")

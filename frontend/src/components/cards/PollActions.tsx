@@ -1,7 +1,6 @@
-import React, { useState } from 'react'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast';
 import { FaBookmark, FaRegBookmark } from 'react-icons/fa6'
-import { loadConfigFromFile } from 'vite'
 
 const PollActions = ({
     pollId,
@@ -50,7 +49,7 @@ const PollActions = ({
 
             {inputCaptured && !isVoteComplete && (
                 <button
-                    className='btn-small ml-auto'
+                    className='btn-small ml-auto transition-all duration-200'
                     onClick={handleVoteClick}
                     disabled={loading}
                 >

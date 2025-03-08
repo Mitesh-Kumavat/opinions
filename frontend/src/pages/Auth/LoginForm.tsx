@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import AuthLayout from '../../components/layout/AuthLayout'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthInput from '../../components/input/AuthInput'
@@ -15,7 +15,13 @@ const LoginForm: React.FC = () => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
     const { updateUser } = useContext(Usercontext);
-    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (localStorage.getItem("token") && localStorage.getItem("token")?.trim() !== "") {
+            navigate("/dashboard")
+        }
+    }, []);
 
     // handle login form submission
     const handleSubmit = async (e: any) => {

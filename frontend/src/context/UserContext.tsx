@@ -19,7 +19,9 @@ type User = {
 type UserContextType = {
     user: User | null;
     updateUser: (userData: User) => void;
+    onUserVoted: () => void;
     clearUser: () => void;
+    toggleBookmarkId: (pollId: number) => void;
     onPollCreateOrDelete: (type?: "create" | "delete") => void;
 };
 
@@ -27,6 +29,8 @@ export const Usercontext = createContext<UserContextType>({
     user: null,
     updateUser: () => { },
     clearUser: () => { },
+    onUserVoted: () => { },
+    toggleBookmarkId: () => { },
     onPollCreateOrDelete: () => { },
 });
 
@@ -45,6 +49,12 @@ const UserProvider = ({ children }: { children: ReactNode }) => {
         setUser(userData);
     };
 
+    // On user votes increase the count of the vote locally
+    const onUserVoted = () => {
+        const totalPollsVotes = user?.totalPollsVotes || 0;
+        updateUserStats("totalPollsVotes", totalPollsVotes + 1);
+    }
+
     // Update total count of posts locally
     const onPollCreateOrDelete = (type: "create" | "delete" = "create") => {
         if (!user) return;
@@ -55,13 +65,34 @@ const UserProvider = ({ children }: { children: ReactNode }) => {
         );
     };
 
+    // Toggle bookmark count of polls locally
+    const toggleBookmarkId = (pollId: number) => {
+        const bookmarks: any[] = user?.bookmarkedPolls || [];
+        const index = bookmarks.indexOf(pollId);
+
+        if (index === -1) {
+            setUser((prev: any) => ({
+                ...prev,
+                bookmarkedPolls: [...bookmarks, pollId],
+                totalPollsBookmarked: prev?.totalPollsBookmarked + 1
+            }));
+        } else {
+            setUser((prev: any) => ({
+                ...prev,
+                bookmarkedPolls: [...bookmarks, pollId],
+                totalPollsBookmarked: prev?.totalPollsBookmarked - 1
+            }));
+        }
+
+    }
+
     // Clear user data (logout)
     const clearUser = () => {
         setUser(null);
     };
 
     return (
-        <Usercontext.Provider value={{ user, updateUser, clearUser, onPollCreateOrDelete }}>
+        <Usercontext.Provider value={{ user, toggleBookmarkId, updateUser, clearUser, onPollCreateOrDelete, onUserVoted }}>
             {children}
         </Usercontext.Provider>
     );

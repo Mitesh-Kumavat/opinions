@@ -9,10 +9,11 @@ import { uploadImage } from '../../utils/uploadImage';
 import { axiosInstance } from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import toast from 'react-hot-toast';
+import Spinner from '../../components/loaders/Spinner';
 
 const CreatePoll: React.FC = () => {
     useUserAuth();
-
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const { user, onPollCreateOrDelete } = useContext(Usercontext);
     const [pollData, setPollData] = useState({
         question: "",
@@ -90,13 +91,13 @@ const CreatePoll: React.FC = () => {
         const optionData = await getOptions();
 
         try {
+            setIsLoading(true);
             const response = await axiosInstance.post(API_PATHS.POLLS.CREATE, {
                 question,
                 type,
                 options: optionData,
                 creatorId: user?._id
             })
-            console.log(response.data);
             if (response && response.status.toString().startsWith("2")) {
                 onPollCreateOrDelete("create");
                 toast.success("Poll Created Successfully.")
@@ -111,7 +112,8 @@ const CreatePoll: React.FC = () => {
                 handleValueChange("error", "Something went wrong. Please Try again.");
             }
         } finally {
-            // clearData();
+            setIsLoading(false);
+            clearData();
         }
     }
 
@@ -189,10 +191,11 @@ const CreatePoll: React.FC = () => {
                 )}
 
                 <button
-                    className='btn-primary py-2 mt-6'
+                    className={`btn-primary flex items-center justify-center py-2 mt-6 ${isLoading ? 'btn-disabled' : 'btn-primary'}`}
                     onClick={handleCreatePoll}
+                    disabled={isLoading}
                 >
-                    CREATE
+                    {isLoading ? <Spinner size="md" color="border-primary" speed="fast" ></Spinner> : "Create Poll"}
                 </button>
 
             </div>

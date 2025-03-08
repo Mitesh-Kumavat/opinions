@@ -23,7 +23,7 @@ const Home = () => {
         if (loading) return;
         setLoading(true);
         try {
-            const response = await axiosInstance.get(`${API_PATHS.POLLS.GET_ALL}?page=${overridePage}&limit=${PAGE_SIZE}`);
+            const response = await axiosInstance.get(`${API_PATHS.POLLS.GET_ALL}?page=${overridePage}&limit=${PAGE_SIZE}&type=${filterType}`);
             if (response.data?.data.polls?.length > 0) {
                 setAllPolls((prevPolls: Array<Object>) => overridePage === 1 ?
                     response.data.data.polls :
@@ -47,14 +47,12 @@ const Home = () => {
     useEffect(() => {
         setPage(1);
         fetchAllPolls(1);
-        return () => { }
     }, [filterType])
 
     useEffect(() => {
         if (page !== 1) {
             fetchAllPolls();
         }
-        return () => { }
     }, [page])
 
     return (
