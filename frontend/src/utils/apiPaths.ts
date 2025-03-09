@@ -14,8 +14,8 @@ export const API_PATHS = {
         VOTE: (pollId: number) => `${BASE_URL}/poll/${pollId}/vote`,
         CLOSE: (pollId: number) => `${BASE_URL}/poll/${pollId}/close`,
         BOOKMARK: (pollId: number) => `${BASE_URL}/poll/${pollId}/bookmark`,
-        GET_BOOKMARKED: `${BASE_URL}/poll/bookmarked`,
-        VOTED_POLLS: `${BASE_URL}/poll/voted`,
+        GET_BOOKMARKED: `${BASE_URL}/poll/user/bookmarked`,
+        VOTED_POLLS: `${BASE_URL}/poll/votedPolls`,
         DELETE: (pollId: number) => `${BASE_URL}/poll/${pollId}/delete`
     },
     IMAGE: {

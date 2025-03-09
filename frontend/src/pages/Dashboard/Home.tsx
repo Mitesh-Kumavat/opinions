@@ -7,6 +7,8 @@ import { API_PATHS } from '../../utils/apiPaths';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import PollCard from '../../components/cards/PollCard';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import EmptyCard from '../../components/cards/EmptyCard';
 
 const Home = () => {
     useUserAuth();
@@ -43,6 +45,9 @@ const Home = () => {
         }
     }
 
+    const loadMorePage = () => {
+        setPage((prevPage: any) => prevPage + 1);
+    }
 
     useEffect(() => {
         setPage(1);
@@ -56,34 +61,52 @@ const Home = () => {
     }, [page])
 
     return (
-        <DashboardLayout activeMenu='Dashboard'>
+        <DashboardLayout activeMenu='Dashboard' stats={stats || []} showStats>
             <div className='my-5 mx-auto'>
 
                 <HeaderWithFilter
-                    title="Polls"
+                    title="All Polls"
                     filterType={filterType}
                     setFilterType={setFilterType}
                 />
 
-                {allPolls.map((poll: any) => (
-                    <PollCard
-                        key={`dashboard_${poll._id}`}
-                        pollId={poll._id}
-                        question={poll.question}
-                        type={poll.type}
-                        options={poll.options}
-                        voters={poll.voters.length || 0}
-                        responses={poll.responses || []}
-                        creatorProfileImg={poll.creator.profileImageUrl || null}
-                        creatorName={poll.creator.fullName}
-                        creatorUserName={poll.creator.username}
-                        userHasVoted={poll.userHasVoted || false}
-                        isPollClosed={poll.closed || false}
-                        createdAt={poll.createdAt || false}
+                {allPolls.length === 0 && (
+                    <EmptyCard
+                        message='Welcome! Be the first to create a new poll.'
+                        btnText='Create Poll'
+                        onClick={() => navigate('/create-poll')}
                     />
+                )}
 
-                ))}
+                <InfiniteScroll
+                    dataLength={allPolls.length || 0}
+                    next={loadMorePage}
+                    hasMore={hasMore ?? false}
+                    endMessage={<p className='info-text'>No more polls to display</p>}
+                    loader={<h4 className='info-text'>Loading...</h4>}
+                >
 
+
+                    {allPolls.map((poll: any) => (
+                        <PollCard
+                            key={`dashboard_${poll._id}`}
+                            pollId={poll._id}
+                            question={poll.question}
+                            type={poll.type}
+                            options={poll.options}
+                            voters={poll.voters.length || 0}
+                            responses={poll.responses || []}
+                            creatorProfileImg={poll.creator.profileImageUrl || null}
+                            creatorName={poll.creator.fullName}
+                            creatorUserName={poll.creator.username}
+                            userHasVoted={poll.userHasVoted || false}
+                            creatorId={poll.creator._id}
+                            isPollClosed={poll.closed || false}
+                            createdAt={poll.createdAt || false}
+                        />
+
+                    ))}
+                </InfiniteScroll>
             </div>
         </DashboardLayout>
     )
