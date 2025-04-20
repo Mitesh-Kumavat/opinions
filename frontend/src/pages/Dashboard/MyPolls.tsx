@@ -17,7 +17,7 @@ const MyPolls = () => {
     const PAGE_SIZE = 10;
     const navigate = useNavigate();
     const [allPolls, setAllPolls] = useState<any>([]);
-    const [stats, setStats] = useState<any>([]);
+    const [_stats, setStats] = useState<any>([]);
     const [page, setPage] = useState<Number>(1);
     const [hasMore, setHasMore] = useState<Boolean>();
     const [loading, setLoading] = useState<Boolean>(false);
