@@ -1,4 +1,4 @@
-export const BASE_URL = `https://opinions-wb1f.onrender.com/api/v1/auth/test`;
+export const BASE_URL = `https://opinions-wb1f.onrender.com/api/v1`;
 
 export const API_PATHS = {
     AUTH: {
