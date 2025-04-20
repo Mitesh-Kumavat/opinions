@@ -33,7 +33,7 @@ const useUserAuth = () => {
         return () => {
             isMounted = false;
         }
-    }, [user, clearUser, updateUser])
+    }, [])
 }
 
 export default useUserAuth
